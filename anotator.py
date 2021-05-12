@@ -15,6 +15,7 @@ countIdx = 0
 for root, dirs, files in os.walk(rgb_path,topdown=False):
     countList = [int(name[:-4]) for name in files]
 
+
 if len(countList) == 0:
     print("there exists no file in image path")
     exit()
@@ -48,8 +49,8 @@ def intersects(rect1,rect2):
     return True
 
 def read(count):
-    rgb_p = f"{rgb_path}\\{count}.png"
-    anot_p = f"{anot_path}\\{count}.txt"
+    rgb_p = f"{rgb_path}\\{str(count).zfill(4)}.png"
+    anot_p = f"{anot_path}\\{str(count).zfill(4)}.txt"
 
     if not os.path.exists(anot_p):
         open(anot_p, 'w')
@@ -77,10 +78,10 @@ def read(count):
     return img
 
 def delete(count, rect1):
-    anot_p = f"{anot_path}\\{count}.txt"
+    anot_p = f"{anot_path}\\{str(count).zfill(4)}.txt"
     temp_p = f"{anot_path}\\temp.txt"
     if not os.path.exists(anot_p):
-        raise Exception(f"file {count}.txt in anottation folder doesn't exist.")
+        raise Exception(f"file {str(count).zfill(4)}.txt in anottation folder doesn't exist.")
     tempfp = open(temp_p, 'w')
 
     with open(anot_p, 'r') as fp:
@@ -109,7 +110,7 @@ def draw(event, x, y, flags, params):
             if drawing == True:
                 xx, yy = min(ix, x), min(iy, y)
                 ww, hh = abs(ix - x), abs(iy - y)
-                with open(f"{anot_path}\\{str(count)}.txt", "a") as outfile:     
+                with open(f"{anot_path}\\{str(count).zfill(4)}.txt", "a") as outfile:     
                     outfile.write(f'{idx} {xx} {yy} {ww} {hh} \n')
                 drawing = False
                 img = read(count)
@@ -176,11 +177,11 @@ while(True):
         if countIdx + 10 < len(countList):
             countIdx += 10
             count = countList[countIdx]
-            img, rgb = read(count)
+            img = read(count)
     elif k == 254:
         if countIdx >= 10:
             countIdx -= 10
             count = countList[countIdx]
-            img, rgb = read(count)
+            img = read(count)
     elif k==-1:  # normally -1 returned,so don't print it
         continue
