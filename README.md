@@ -29,6 +29,7 @@ video-anot/
 │   └──── 0005.txt
 
 └── anotator.py
+
 └── get_info.py
 # General Information
 
