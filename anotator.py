@@ -3,6 +3,8 @@ import cv2
 import numpy as np
 from time import sleep
 
+SCALE = 1
+
 pathname = os.path.dirname(sys.argv[0])        
 PATH = os.path.abspath(pathname) # path string
 
@@ -26,7 +28,7 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 Classes = {0: "Pedestrian",1: "Car", 2:"UAP", 3:"UAV"}
 idx = 1
 
-Color_Scheme = {0: (0, 0, 0), 1: (0, 255, 255), 2:(255,255,0), 3:(125,125,125)}
+Color_Scheme = {0: (200, 50, 150), 1: (0, 255, 255), 2:(255,255,0), 3:(125,125,125)}
 
 States = {0: "Drawing", 1: "Deleting",}
 state = 0
@@ -34,6 +36,9 @@ state = 0
 drawing = False
 ix = 0
 iy = 0
+
+cur_x = 0
+cur_y = 0
 
 def intersects(rect1,rect2):
     p1 = (rect1[0] , rect1[1]) 
@@ -58,7 +63,7 @@ def read(count):
     img = cv2.imread(rgb_p)
     
     if drawing:
-        img = cv2.circle(img,(ix,iy), 3, (255,255,255), -1)
+        img = cv2.circle(img,(int(ix/SCALE),int(iy/SCALE)), 3, (255,255,255), -1)
     
     with open(anot_p, 'r') as fp:
         line = fp.readline()
@@ -71,10 +76,19 @@ def read(count):
             p2 = (int(vals[1] + vals[3]),int(vals[2]+ vals[4]))
             img = cv2.rectangle(img, p1, p2, Color_Scheme[vals[0]], 1)
             line = fp.readline()
+
+    h = int(img.shape[0]* SCALE)
+    w = int(img.shape[1]*SCALE)
+
     cv2.putText(img, f'{Classes[idx]}',(10,25), font, 1,(255,255,255),1,cv2.LINE_AA)
     cv2.putText(img, f'{States[state]}',(10,50), font, 1,(255,255,255),1,cv2.LINE_AA)
     cv2.putText(img, f'{count}', (1780,30), font, 1,(255,255,255),1,cv2.LINE_AA)
     
+    cv2.line(img,(cur_x - 3000, cur_y),(cur_x + 3000,cur_y),(255,0,0),1)
+    cv2.line(img,(cur_x, cur_y - 3000),(cur_x,cur_y + 3000),(255,0,0),1)
+
+    img = cv2.resize(img, (w,h), interpolation = cv2.INTER_AREA)
+
     return img
 
 def delete(count, rect1):
@@ -104,12 +118,14 @@ def delete(count, rect1):
 img = read(count)
 
 def draw(event, x, y, flags, params):
-    global ix,iy,drawing, img
+    global ix,iy,drawing, img, cur_x, cur_y
+    cur_x = int(x / SCALE)
+    cur_y = int(y / SCALE)
     if event == cv2.EVENT_RBUTTONDOWN:
         if States[state] == "Drawing":
             if drawing == True:
-                xx, yy = min(ix, x), min(iy, y)
-                ww, hh = abs(ix - x), abs(iy - y)
+                xx, yy = int(min(ix, x)/SCALE), int(min(iy, y)/SCALE)
+                ww, hh = int(abs(ix - x)/SCALE), int(abs(iy - y)/SCALE)
                 with open(f"{anot_path}\\{str(count).zfill(4)}.txt", "a") as outfile:     
                     outfile.write(f'{idx} {xx} {yy} {ww} {hh} \n')
                 drawing = False
@@ -118,11 +134,11 @@ def draw(event, x, y, flags, params):
                 drawing = True
                 ix = x
                 iy = y
-                img = cv2.circle(img,(ix,iy), 3, (255,255,255), -1)
+                img = cv2.circle(img,(int(ix/SCALE),int(iy/SCALE)), 5, (255,255,255), -1)
         if States[state] == "Deleting":
             if drawing == True:
-                xx, yy = min(ix, x), min(iy, y)
-                ww, hh = abs(ix - x), abs(iy - y)
+                xx, yy = int(min(ix, x)/SCALE), int(min(iy, y)/SCALE)
+                ww, hh = int(abs(ix - x)/SCALE), int(abs(iy - y)/SCALE)
                 rect1 = (xx, yy, ww, hh)
                 delete(count, rect1)
                 drawing = False
@@ -131,15 +147,17 @@ def draw(event, x, y, flags, params):
                 drawing = True
                 ix = x
                 iy = y
-                img = cv2.circle(img,(ix,iy), 3, (255,255,255), -1)
+                img = cv2.circle(img,(int(ix/SCALE),int(iy/SCALE)), 5, (255,255,255), -1)
     elif event== cv2.EVENT_LBUTTONDOWN:
         drawing = False
         img = read(count)
 
-cv2.namedWindow("Window")
+cv2.namedWindow('Window', flags=cv2.WINDOW_GUI_NORMAL)
+cv2.setWindowProperty("Window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 cv2.setMouseCallback("Window",draw)
 
 while(True):
+    img = read(count)
     cv2.imshow("Window",img)
     k = cv2.waitKey(3)
     if k == 27:
@@ -148,40 +166,40 @@ while(True):
         if countIdx + 1 < len(countList):
             countIdx += 1
             count = countList[countIdx]
-            img = read(count)  
+            #img = read(count)  
     elif k == 122:
         if countIdx > 0 :
             countIdx -= 1
             count = countList[countIdx]
-            img = read(count)
+            #img = read(count)
     elif k == 115:
         idx += 1
         idx = idx % len(Classes)
-        img= read(count)
+        #img= read(count)
     elif k == 100:
         state += 1
         state = state % len(States)
         drawing = False
-        img = read(count)
+        #img = read(count)
     elif k == 252:
         if countIdx + 100 < len(countList):
             countIdx += 100
             count = countList[countIdx]
-            img = read(count)
+            #img = read(count)
     elif k == 240:
         if countIdx >= 100:
             countIdx -= 100
             count = countList[countIdx]
-            img = read(count)
+            #img = read(count)
     elif k == 105:
         if countIdx + 10 < len(countList):
             countIdx += 10
             count = countList[countIdx]
-            img = read(count)
+            #img = read(count)
     elif k == 254:
         if countIdx >= 10:
             countIdx -= 10
             count = countList[countIdx]
-            img = read(count)
+            #img = read(count)
     elif k==-1:  # normally -1 returned,so don't print it
         continue
