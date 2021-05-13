@@ -6,32 +6,36 @@ video-anot/
 
 ├── imgs/
 
-│   ├──── 1.png
+│   ├──── 0001.png
 
-│   ├──── 2.png
+│   ├──── 0002.png
 
-│   ├──── 3.png
+│   ├──── 0003.png
 
-│   └──── 4.png
+│   └──── 0004.png
 
-│   └──── 5.png
+│   └──── 0005.png
 
 ├── anots/
 
-│   ├──── 1.txt
+│   ├──── 0001.txt
 
-│   ├──── 2.txt
+│   ├──── 0002.txt
 
-│   ├──── 3.txt
+│   ├──── 0003.txt
 
-│   └──── 4.txt
+│   └──── 0004.txt
 
-│   └──── 5.txt
+│   └──── 0005.txt
 
 └── anotator.py
+
+└── get_info.py
 # General Information
 
 Çalıştırmak için anatotaor.py dosyasını çalışıtırın.
+
+ESC tuşu ile çıkılıyor
 
 İlk başta deneme yapmak için beşer adet dosya imgs ve anot içinde bulunuyor.
 
