@@ -65,6 +65,9 @@ def read(count):
     if drawing:
         img = cv2.circle(img,(int(ix/SCALE),int(iy/SCALE)), 3, (255,255,255), -1)
     
+    cv2.line(img,(cur_x - 3000, cur_y),(cur_x + 3000,cur_y),(255,0,0),1)
+    cv2.line(img,(cur_x, cur_y - 3000),(cur_x,cur_y + 3000),(255,0,0),1)
+
     with open(anot_p, 'r') as fp:
         line = fp.readline()
         while line:
@@ -74,21 +77,18 @@ def read(count):
             #print(vals)
             p1 = (int(vals[1]), int(vals[2]))
             p2 = (int(vals[1] + vals[3]),int(vals[2]+ vals[4]))
-            img = cv2.rectangle(img, p1, p2, Color_Scheme[vals[0]], 1)
+            img = cv2.rectangle(img, p1, p2, Color_Scheme[vals[0]], 2)
             line = fp.readline()
 
     h = int(img.shape[0]* SCALE)
     w = int(img.shape[1]*SCALE)
 
-    cv2.putText(img, f'{Classes[idx]}',(10,25), font, 1,(255,255,255),1,cv2.LINE_AA)
-    cv2.putText(img, f'{States[state]}',(10,50), font, 1,(255,255,255),1,cv2.LINE_AA)
-    cv2.putText(img, f'{count}', (1780,30), font, 1,(255,255,255),1,cv2.LINE_AA)
+    img = cv2.resize(img, (w,h))
     
-    cv2.line(img,(cur_x - 3000, cur_y),(cur_x + 3000,cur_y),(255,0,0),1)
-    cv2.line(img,(cur_x, cur_y - 3000),(cur_x,cur_y + 3000),(255,0,0),1)
-
-    img = cv2.resize(img, (w,h), interpolation = cv2.INTER_AREA)
-
+    cv2.putText(img, f'{Classes[idx]}',(10,25), font, 1,(255,255,255),2, cv2.LINE_AA)
+    cv2.putText(img, f'{States[state]}',(10,50), font, 1,(255,255,255),2, cv2.LINE_AA)
+    cv2.putText(img, f'{count}', (w-100,30), font, 1,(255,255,255),2, cv2.LINE_AA)
+    
     return img
 
 def delete(count, rect1):
