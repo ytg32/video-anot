@@ -4,7 +4,7 @@ import numpy as np
 from time import sleep
 from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
 from random import randint, uniform
-SCALE = 1.45
+SCALE = 1
 
 pathname = os.path.dirname(sys.argv[0])        
 PATH = os.path.abspath(pathname) # path string
@@ -89,7 +89,8 @@ def read(count):
     h = int(img.shape[0]* SCALE)
     w = int(img.shape[1]*SCALE)
     #print(img.shape[0],img.shape[1])
-    img = cv2.resize(img, (w,h))
+    if(SCALE != 1):
+        img = cv2.resize(img, (w,h))
     
     cv2.putText(img, f'{Classes[idx]}',(10,25), font, 1,(255,255,255),2, cv2.LINE_AA)
     cv2.putText(img, f'{States[state]}',(10,50), font, 1,(255,255,255),2, cv2.LINE_AA)
@@ -198,8 +199,8 @@ def draw(event, x, y, flags, params):
         drawing = False
         img = read(count)
 
-cv2.namedWindow('Window')
-#cv2.setWindowProperty("Window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+cv2.namedWindow('Window', flags=cv2.WINDOW_GUI_NORMAL)
+cv2.setWindowProperty("Window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 cv2.setMouseCallback("Window",draw)
 
 while(True):
