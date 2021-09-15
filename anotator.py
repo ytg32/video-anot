@@ -24,6 +24,7 @@ UAI_img = Image.open(UAI_path)
 for root, dirs, files in os.walk(rgb_path,topdown=False):
     countList = [int(name[5:-4]) for name in files]
 
+countList.sort()
 
 if len(countList) == 0:
     print("there exists no file in image path")
