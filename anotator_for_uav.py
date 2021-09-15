@@ -2,7 +2,8 @@ import sys, os
 import cv2
 import numpy as np
 from time import sleep
-
+from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
+from random import randint, uniform
 SCALE = 1.45
 
 pathname = os.path.dirname(sys.argv[0])        
@@ -10,12 +11,16 @@ PATH = os.path.abspath(pathname) # path string
 
 anot_path = os.path.join(PATH + "\\anots")
 rgb_path = os.path.join(PATH + "\\imgs")
-
+UAP_path = os.path.join(PATH + "\\UAP.png")
+UAI_path = os.path.join(PATH + "\\UAI.png")
 
 anot_name = os.listdir(anot_path)[0][:6]
 countList = None
 countIdx = 0
 
+
+UAP_img = Image.open(UAP_path)
+UAI_img = Image.open(UAI_path)
 
 for root, dirs, files in os.walk(rgb_path,topdown=False):
     countList = [int(name[3:-4]) for name in files]
@@ -33,7 +38,7 @@ idx = 1
 
 Color_Scheme = {0: (200, 50, 150), 1: (0, 255, 255), 2:(255,255,0), 3:(125,125,125)}
 
-States = {0: "Drawing", 1: "Deleting",}
+States = {0: "Drawing", 1: "Deleting"}
 state = 0
 
 drawing = False
@@ -126,18 +131,58 @@ def draw(event, x, y, flags, params):
     cur_y = int(y / SCALE)
     if event == cv2.EVENT_RBUTTONDOWN:
         if States[state] == "Drawing":
-            if drawing == True:
-                xx, yy = int(min(ix, x)/SCALE), int(min(iy, y)/SCALE)
-                ww, hh = int(abs(ix - x)/SCALE), int(abs(iy - y)/SCALE)
-                with open(anot_p, "a") as outfile:     
-                    outfile.write(f'{idx} {xx} {yy} {ww} {hh} \n')
-                drawing = False
-                img = read(count)
-            else:    
-                drawing = True
-                ix = x
-                iy = y
-                img = cv2.circle(img,(int(ix/SCALE),int(iy/SCALE)), 5, (255,255,255), -1)
+            if(idx in (0,1)):
+                if drawing == True:
+                    xx, yy = int(min(ix, x)/SCALE), int(min(iy, y)/SCALE)
+                    ww, hh = int(abs(ix - x)/SCALE), int(abs(iy - y)/SCALE)
+                    with open(anot_p, "a") as outfile:     
+                        outfile.write(f'{idx} {xx} {yy} {ww} {hh} \n')
+                    drawing = False
+                    img = read(count)
+                else:    
+                    drawing = True
+                    ix = x
+                    iy = y
+                    img = cv2.circle(img,(int(ix/SCALE),int(iy/SCALE)), 5, (255,255,255), -1)
+            else:
+                if drawing == True:
+                    xx, yy = int(min(ix, x)/SCALE), int(min(iy, y)/SCALE)
+                    ww, hh = int(abs(ix - x)/SCALE), int(abs(iy - y)/SCALE)
+                    net = max(ww,hh)
+                    with open(anot_p, "a") as outfile:     
+                        outfile.write(f'{idx} {xx} {yy} {net} {net} \n')
+                    drawing = False
+                    rgb_p = f"{rgb_path}\\img{str(count).zfill(6)}.jpg"
+
+                    im = Image.open(rgb_p)
+
+                    width = int(net)
+                    height = int(net)
+                    dim = (width, height)
+                    # resize image
+
+                    resized = None
+                    if (idx == 3):
+                        resized = UAI_img.resize(dim)
+                    else:
+                        resized = UAP_img.resize(dim)
+
+                    degree = randint(0,360)
+                    resized = resized.rotate(degree)
+                    
+                    enhancer = ImageEnhance.Brightness(resized)
+                    factor = uniform(0.7, 1.15)
+                    resized = enhancer.enhance(0.7)
+                    
+                    im.paste(resized,(xx, yy), resized)
+                    im.save(rgb_p)
+                    img = read(count)
+                else:    
+                    drawing = True
+                    ix = x
+                    iy = y
+                    img = cv2.circle(img,(int(ix/SCALE),int(iy/SCALE)), 5, (255,255,255), -1)
+        
         if States[state] == "Deleting":
             if drawing == True:
                 xx, yy = int(min(ix, x)/SCALE), int(min(iy, y)/SCALE)
