@@ -77,7 +77,8 @@ def read(count):
             p1 = (int(vals[1]), int(vals[2]))
             p2 = (int(vals[1] + vals[3]),int(vals[2]+ vals[4]))
             img = cv2.rectangle(img, p1, p2, Color_Scheme[vals[0]], 2)
-            p_label = (int(vals[1]), int(vals[2] - 10))
+            p_label = ( int(vals[1] + vals[3] - 100), int(vals[2] + vals[4] + 18) ) if int(vals[2] - 17) < 0 else (  int(vals[1]), int(vals[2] - 10) )
+            
             cv2.putText(img, f'{Classes[vals[0]]}', p_label, font, 0.75, (255,255,255),1, cv2.LINE_AA)
             line = fp.readline()
 
