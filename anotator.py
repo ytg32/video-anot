@@ -17,7 +17,6 @@ countIdx = 0
 for root, dirs, files in os.walk(rgb_path,topdown=False):
     countList = [int(name[:-4]) for name in files]
 
-
 if len(countList) == 0:
     print("there exists no file in image path")
     exit()
@@ -78,10 +77,12 @@ def read(count):
             p1 = (int(vals[1]), int(vals[2]))
             p2 = (int(vals[1] + vals[3]),int(vals[2]+ vals[4]))
             img = cv2.rectangle(img, p1, p2, Color_Scheme[vals[0]], 2)
+            p_label = (int(vals[1]), int(vals[2] - 10))
+            cv2.putText(img, f'{Classes[idx]}', p_label, font, 0.75, (255,255,255),1, cv2.LINE_AA)
             line = fp.readline()
 
     h = int(img.shape[0]* SCALE)
-    w = int(img.shape[1]*SCALE)
+    w = int(img.shape[1]* SCALE)
 
     img = cv2.resize(img, (w,h))
     
@@ -119,7 +120,7 @@ img = read(count)
 
 def draw(event, x, y, flags, params):
     global ix,iy,drawing, img, cur_x, cur_y
-    cur_x = int(x / SCALE)
+    cur_x = int(x / SCALE) 
     cur_y = int(y / SCALE)
     if event == cv2.EVENT_RBUTTONDOWN:
         if States[state] == "Drawing":
